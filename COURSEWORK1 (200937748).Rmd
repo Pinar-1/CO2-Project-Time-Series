@@ -1,0 +1,117 @@
+---
+title: "Time Series Coursework 1"
+author: "PINAR YAVUZ"
+date: "2024-03-12"
+output:
+  html_document:
+    theme: cerulean
+    toc: true
+    toc_float: true
+ 
+---
+
+
+
+
+
+## 1.Part 1 
+### 1.1 Installing Packages
+Firstly, I installed packages using the code "install.packages("prophet")". I tried to use "remote", but encountered some problems. 
+I didn't run this in my .RMD (Rmarkdown) file, as it's a one-time installation process.
+
+### 1.2 What is CO2?
+Carbon Dioxide (CO2), is a green house gas emitted from burning of fossil fuels,
+respiration, natural fires, volanoe eruptions etc.
+When i ran CO2 it loaded as Mauna Loa's Atmospheric CO2 Concentration.
+It is a time series expressed in parts per million (ppm) with 468 monthly observations from 1959 to 1979.
+
+### 1.3 Purpose of the project
+The purpose of this project is to use time series to allow us to see the long-term trends of CO2 concentration. Analysing the past data can reveal a trend for the future, as the 'CO2' data is from 1959 to 1979, as I have explained above.
+By doing this type of analysis, it is beneficial for statisticians to see the trends and make informed decisions on the impacts of CO2. As CO2 is a gas that adds to greenhouse gases, we can discover and prepare for any negative effects it will have in the future.
+
+## 2. Part 2 (Inputting R-codes)
+### 2.1 Codes & Plot 1
+In this section there will be different types of graphs and their findings to show the change in CO2 levels.
+```{r}
+co2.df = data.frame(ds=zoo::as.yearmon(time(co2)), y=co2)
+# By using the dataframe function i have created 2 columns named 'ds'(x-axis,which are the years) and 'y'(which are the CO2 values).
+
+seasonalityfit= prophet::prophet(co2.df,weekly.seasonality = TRUE,daily.seasonality = TRUE)
+# I added the dataframe co2 to the profit forecaster function and i stored it to my function 'seasonalityfit'.
+
+future = prophet::make_future_dataframe(seasonalityfit, periods=52, freq="quarter")
+# I have created a future dataframe with 8 periods with a frequency of quarterly , for the 'seasonalityfit' model.
+
+prediction = predict(seasonalityfit, future)
+# By using the predict function, I have enabled a prediction for 'seasonalityfit' on the future data frame 'future', and named it 'prediction', which i will be using in the next code.
+```
+
+```{r}
+#I created a visual diagram using the plot code. The plotted data shows 'prediction' in relation to 'seasonalityfit'
+plot( seasonalityfit,prediction,xlab = "Years", ylab = "CO2 Concentration (ppm)")
+
+```
+
+The graph indicates the CO2 concentration and its increase over the years. It has been consistently growing, but over the years, there have been fluctuations; this could be due to seasonal changes, holidays and climate.
+To have a deeper understanding, I have created a linear regression model to analyse and understand the data and will be explaining this further.
+```{r}
+plot(co2.df$ds, co2.df$y, type = "l", xlab = "Years", ylab = "CO2 Concentration (ppm)", main = "Linear Regression Analysis",col="red")
+```
+
+
+CO2, a greenhouse gas, is emitted not only by natural processes like wildfires and volcanic eruptions but also by human activities such as burning fossil fuels and breathing. This underscores our significant role in the CO2 balance. Plants, through photosynthesis, play a crucial part in this balance by releasing oxygen into the environment.
+I have created a linear regression plot to understand and analyse the data on the increase in CO2. Overall, the concentration of CO2 has been increasing at a steady pace. This could be because the emission level has surpassed plants' ability to release oxygen into the air, leading to an imbalance in the CO2 levels. The shape of the graph indicates that the concentration varies within the year. 
+
+The data shows that in 1959, CO2 levels were around 310 ppm and rose to 315 ppm. By 1970, the concentration levels had only increased to approximately 325ppm over ten years. However, there was a considerable increase between 1980 and 1990, where CO2 levels rose from 330ppm to 350ppm, resulting in a 6% increase.We will look deeper into the increase in the following plots.
+
+```{r}
+# Here have created a summary of the linear model to further analyse the data.
+lm.model<-lm(y~ds, data = co2.df)
+summary(lm.model)
+```
+Residuals are defined as the dissimilarity between the observed and predicted values in data. These residuals have a significant role in regression analysis as they help in determining the accuracy of the model. In our case, the minimum residual was -6.039, and the maximum was 6.5149, indicating that the model's predictions aligned closely with the actual data points. The median residual was also relatively low at -0.0017.
+
+Moving further to the coefficient values, we can see that for "ds", which are the years, it was 1.308e+00. As time passes, the units of CO2 roughly increase. With a positive value, and from the graph, we can see a positive correlation between the increase in years and the CO2 concentration level, reinforcing the model's accuracy.
+
+We can conclude that with high confidence, the R-squared value was 96.95%, indicating an excellent fit of the regression to the data and variance. We observe that the p-values are very low (2e-16), and the significant code is represented by three asterisks (***). This implies compelling evidence against the null hypothesis, indicating that the dependent and independent variables are significantly and positively correlated.
+
+### 2.2 Dyplot
+```{r}
+
+#Here, I have created a 'dyplot'. I encountered a warning sign when I ran the function of changing my select function. However, I do not have select functions on my code. Therefore, to make my knitting neater, I decided to use the 'suppress warning' function to create a tidier look on my workbook.
+suppressWarnings(prophet::dyplot.prophet(seasonalityfit,prediction,xlab = "Years", ylab = "CO2 Concentration (ppm)",main= "Prediction & Actual rates of CO2 over the years"))
+```
+In this study, a crucial tool used is an interactive graph that vividly illustrates the correlation between the predicted and actual rates of CO2 over the years. 
+By dragging the interactive X-axis, you can examine the graph more closely, analyse the concentration levels at specific months, and compare the predictions to the actual figure.
+
+As we can see, CO2 levels are increasing yearly, and the two variables have a clear positive correlation.
+By analysing the graph closer, we can see that the concentration of carbon dioxide fluctuates yearly. However, in May, it is at its peak with the highest concentration and gradually decreases to its lowest concentration in September and October. CO2 being at its optimum during May could result from photosynthesis; during this period, plants only begin photosynthesis, meaning they start to absorb the CO2, leading to a decrease after May. However, outside factors could prevent all CO2 from being absorbed, leading to a gradual increase over the years. 
+
+In this graph, the blue line shows the prediction of CO2 levels, and the black dots are the actual values. As we can see, there are few outliers within this dataset, and the shape of each year is very similar. As we can see, the predictions were very close to the actual values. In May 1962, the CO2 value was predicted to be 321.12 ppm, but the actual value was slightly lower at 320.85 ppm. This indicates that the values were overpredicted. In May of 1970, the forecasted level amounted to 328.38ppm, whereas the predicted level was 327.91ppm, resulting in a difference of 0.47ppm. The CO2 level surged by 2.2% over eight years. 
+
+In May 1980, the CO2 level increased by 3.93%. Notably, the highest increase occurred between 1980 and 1990, reaching a peak of 4.6%.There were minor outliers in 1991 when CO2 levels were higher than anticipated. The predicted level was 357.96ppm, while the actual level was 359.22ppm, only a year later.
+
+PREDICTION RESULTS : 
+Towards the end of the graph, we can see predictions for the coming years, extending until December 2010. We can observe that steady fluctuations and increases are still predicted. From December 1999, the CO2 levels are expected to be 366.12 ppm and eventually reach 380.22 ppm by December 2009, a 3.8% increase.
+
+
+### 2.3 Plot.Components
+```{r}
+# Now i will generate a code to visualise the individual components of the time series, including trend, yearly, weekly and daily.
+prophet::prophet_plot_components(seasonalityfit,prediction) 
+```
+
+
+Graph1:
+According to the data presented in this graph, there is a clear and positive correlation between the years and the concentration of CO2. By observing the slope of the line, we can deduce that the growth between 1960 and 1970 was minimal. However, as the years progressed, the level of CO2 increased significantly, rising from 320 ppm in 1960 to 370 ppm.
+
+Graph2:
+This feature showcases the changes in CO2 levels throughout the week. Notably, there is a noticeable decline from Mondays (0.025) to Tuesdays (-0.050), representing a 300% decrease as the value becomes negative. From Wednesdays to Thursdays, the value gradually increases before decreasing again towards Saturday. Mondays and Thursdays show the optimal values of 0.025.
+
+Graph3: 
+This graph displays the quarterly rate of CO2 emissions, representing fluctuations throughout the year. Between April and July, we observe values varying between 2.5 and 1.5. Additionally, there is a significant decrease from July to October, which could be attributed to a season where many people prefer to walk and not take transport due to sunny weather and less need for transportation, resulting in lower CO2 emissions.
+
+Graph 4:
+This graph depicts the variation in CO2 levels throughout the day. There is a minor fluctuation from 4 am to 7 pm, considerably lower than the increase seen in the evening. During the day, photosynthesis takes place, leading to the release of oxygen into the atmosphere, which in turn reduces the amount of CO2. However, since plants release CO2 at night, the levels tend to be higher. As evidenced by the data, at 11 pm, the CO2 level was at 0.12, but it dropped to -0.04 (133.3%) by 4 am.
+
+In conclusion, the data and graphs produced show a clear correlation between the two variables, and the CO2 rates have been gradually increasing over time at different rates each year.
